@@ -1,0 +1,35 @@
+﻿---
+- hosts: testhost
+  tasks:
+    - name: Installs nginx web server
+      apt: pkg=nginx state=installed update_cache=true
+	with_items:
+	- zsh
+   	- wget
+      notify:
+        - start nginx
+
+    - ansible.posix.sysctl:
+      name: fs.file-max
+      value: '1204000'
+      state: present
+
+    - ansible.posix.sysctl:
+      name: net.core.somaxconn
+      value: '65535'
+      state: present
+
+    - name: Set up multiple authorized keys
+      ansible.posix.authorized_key:
+      user: root
+      state: present
+      key: '{{ item }}'
+        with_file:
+        - public_keys/user1.pub
+        - public_keys/user2.pub
+
+  handlers:
+    - name: start nginx
+      service: name=nginx state=started
+
+	
