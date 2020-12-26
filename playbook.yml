@@ -25,15 +25,12 @@
       local_action: 
         module: git      
         repo: https://github.com/MrEgenius/test.git 
-	dest: /tmp/git_test
+	dest: /tmp/test
         
     - name: Copy index.html to webroot
-      copy: src=/tmp/git_test/static_files/index.html dest=/var/www/ mode=0644
+      copy: src=/tmp/test/static_files/index.html dest=/var/www/ mode=0644
 	notify:
         - start nginx
-
-    - name: Remove tmp from ansible host
-      local_action: shell rm -rf /tmp/git_test
 
     - ansible.posix.sysctl:
       name: fs.file-max
@@ -51,8 +48,11 @@
       state: present
       key: '{{ item }}'
         with_file:
-        - public_keys/user1.pub
-        - public_keys/user2.pub
+        - /tmp/test/public_keys/user1.pub
+        - /tmp/test/public_keys/user2.pub
+
+    - name: Remove tmp from ansible host
+      local_action: shell rm -rf /tmp/test
 
   handlers:
     - name: start nginx
