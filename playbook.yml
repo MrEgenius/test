@@ -1,13 +1,39 @@
 ﻿---
-- hosts: testhost
+- hosts: web
+  sudo: yes
+  
   tasks:
-    - name: Installs nginx web server
-      apt: pkg=nginx state=installed update_cache=true
-	with_items:
+    - name: Installs nginx web server and other apps
+      apt: 
+	pkg:
+	- nginx
 	- zsh
    	- wget
-      notify:
+	state: latest
+	update_cache: yes
+	
+    - name: Change root dir in nginx default host
+      lineinfile: /etc/nginx/sites-available/default regexp="root /var/www/html" line="root /var/www"
+
+    - name: Create simlink to default config
+      file: 
+	src: /etc/nginx/sites-available/default
+	dst: /etc/nginx/sites-enabled/default
+	state: link
+
+    - name: Copy git repo in tmp on ansible host
+      local_action: 
+        module: git      
+        repo: https://github.com/MrEgenius/test.git 
+	dest: /tmp/git_test
+        
+    - name: Copy index.html to webroot
+      copy: src=/tmp/git_test/static_files/index.html dest=/var/www/ mode=0644
+	notify:
         - start nginx
+
+    - name: Remove tmp from ansible host
+      local_action: shell rm -rf /tmp/git_test
 
     - ansible.posix.sysctl:
       name: fs.file-max
