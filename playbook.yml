@@ -25,7 +25,7 @@
       local_action: 
         module: git      
         repo: https://github.com/MrEgenius/test.git 
-	dest: /tmp/test
+        dest: /tmp/test
         
     - name: Copy index.html to webroot
       copy: src=/tmp/test/static_files/index.html dest=/var/www/ mode=0644
@@ -35,12 +35,12 @@
     - ansible.posix.sysctl:
       name: fs.file-max
         value: '1204000'
-	state: present
+        state: present
 
     - ansible.posix.sysctl:
       name: net.core.somaxconn
         value: '65535'
-	state: present
+        state: present
 
     - name: Set up multiple authorized keys
       ansible.posix.authorized_key:
