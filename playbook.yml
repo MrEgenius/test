@@ -1,25 +1,25 @@
-﻿---
+---
 - hosts: web
-  sudo: yes
+ sudo: yes
   
   tasks:
     - name: Installs nginx web server and other apps
-      apt: 
-	pkg:
-	- nginx
-	- zsh
-   	- wget
-	state: latest
-	update_cache: yes
-	
-    - name: Change root dir in nginx default host
-      lineinfile: /etc/nginx/sites-available/default regexp="root /var/www/html" line="root /var/www"
+      apt:
+        pkg:
+          - nginx
+          - zsh
+          - wget
+        state: latest
+        update_cache: yes
 
-    - name: Create simlink to default config
+    - name: Change root dir in nginx default host
+      lineinfile: /etc/nginx/sites-available/default regexp="root /var/www/html;" line="root /var/www;"
+
+    - name: Create symlink to default config
       file: 
-	src: /etc/nginx/sites-available/default
-	dst: /etc/nginx/sites-enabled/default
-	state: link
+        src: /etc/nginx/sites-available/default
+        dst: /etc/nginx/sites-enabled/default
+        state: link
 
     - name: Copy git repo in tmp on ansible host
       local_action: 
@@ -29,24 +29,24 @@
         
     - name: Copy index.html to webroot
       copy: src=/tmp/test/static_files/index.html dest=/var/www/ mode=0644
-	notify:
-        - start nginx
+        notify:
+        - restart nginx
 
     - ansible.posix.sysctl:
       name: fs.file-max
-      value: '1204000'
-      state: present
+        value: '1204000'
+	state: present
 
     - ansible.posix.sysctl:
       name: net.core.somaxconn
-      value: '65535'
-      state: present
+        value: '65535'
+	state: present
 
     - name: Set up multiple authorized keys
       ansible.posix.authorized_key:
-      user: root
-      state: present
-      key: '{{ item }}'
+        user: root
+	state: present
+	key: '{{ item }}'
         with_file:
         - /tmp/test/public_keys/user1.pub
         - /tmp/test/public_keys/user2.pub
@@ -55,6 +55,8 @@
       local_action: shell rm -rf /tmp/test
 
   handlers:
-    - name: start nginx
-      service: name=nginx state=started
-
+  - name: restart nginx
+    become: true
+      service:
+        name: nginx
+        state: restarted
