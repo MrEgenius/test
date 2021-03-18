@@ -45,8 +45,8 @@
     - name: Set up multiple authorized keys
       ansible.posix.authorized_key:
         user: root
-	state: present
-	key: '{{ item }}'
+        state: present
+        key: '{{ item }}'
         with_file:
         - /tmp/test/public_keys/user1.pub
         - /tmp/test/public_keys/user2.pub
